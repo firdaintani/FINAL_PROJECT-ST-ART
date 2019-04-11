@@ -26,7 +26,7 @@ CREATE TABLE `brand` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `brand_name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -35,7 +35,7 @@ CREATE TABLE `brand` (
 
 LOCK TABLES `brand` WRITE;
 /*!40000 ALTER TABLE `brand` DISABLE KEYS */;
-INSERT INTO `brand` VALUES (1,'Sakura'),(2,'Faber Castell'),(3,'Tombow'),(5,'Snowman'),(6,'Pentel'),(7,'Artline'),(8,'Winsor&Newton'),(9,'Reevese'),(10,'Giotto'),(11,'Royal Talens'),(12,'Kuretake'),(13,'Artmedia'),(14,'Arto'),(15,'Canson'),(16,'Staedtler'),(17,'Ecoline');
+INSERT INTO `brand` VALUES (5,'Snowman'),(6,'Pentel'),(7,'Artline'),(8,'Winsor&Newton'),(9,'Reevese'),(10,'Giotto'),(11,'Royal Talens'),(12,'Kuretake'),(13,'Artmedia'),(14,'Arto'),(15,'Canson'),(16,'Staedtler'),(17,'Ecoline'),(18,'Sakura'),(23,'Tombow');
 /*!40000 ALTER TABLE `brand` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -50,7 +50,7 @@ CREATE TABLE `category` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `category_name` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,6 +78,7 @@ CREATE TABLE `product` (
   `stock` int(11) NOT NULL,
   `product_image` varchar(45) NOT NULL,
   `description` varchar(500) NOT NULL,
+  `Brand` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -103,10 +104,11 @@ CREATE TABLE `user` (
   `password` varchar(64) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(45) NOT NULL,
-  `phone` int(12) NOT NULL,
+  `phone` varchar(15) NOT NULL,
   `address` varchar(100) DEFAULT NULL,
   `role` varchar(5) NOT NULL DEFAULT 'user',
-  `verified` int(11) DEFAULT '0',
+  `verified` int(11) NOT NULL DEFAULT '0',
+  `code_verify` int(6) NOT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -117,7 +119,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('firda','85d2691fb036388a2f368f602637c12ae302ec4161129f8f695e7c8e0807bdf5','firda','firdaintani@gmail.com',892378269,NULL,'admin',1);
+INSERT INTO `user` VALUES ('firda','85d2691fb036388a2f368f602637c12ae302ec4161129f8f695e7c8e0807bdf5','firda','firdaintani@gmail.com','892378269',NULL,'admin',1,0),('firda123','74beaa37b69b0916235d3a58e38afabfcd0570e24b1eb2d73fc153307a8610d1','firda','firdaintani5797@gmail.com','937423846',NULL,'user',0,94351),('firdaintani','74beaa37b69b0916235d3a58e38afabfcd0570e24b1eb2d73fc153307a8610d1','firda','firdaintani5797@gmail.com','02489356',NULL,'user',1,516181),('fitri11','74beaa37b69b0916235d3a58e38afabfcd0570e24b1eb2d73fc153307a8610d1','fitri','firdaintani5797@gmail.com','98389',NULL,'user',1,744655),('fitri1234','74beaa37b69b0916235d3a58e38afabfcd0570e24b1eb2d73fc153307a8610d1','fitriii','firdaintani@gmail.com','0384389',NULL,'user',1,938258);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -130,4 +132,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-06 21:34:16
+-- Dump completed on 2019-04-09 20:28:32

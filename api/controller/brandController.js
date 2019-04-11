@@ -5,10 +5,10 @@ module.exports={
         var sql ='select * from brand'
         db.query(sql,(err,result)=>{
             try{
-                if(err) throw err
+                if(err) throw {error:true, msg : 'error in database'}
                 res.send(result)
             }
-            catch{
+            catch(err){
                 res.send(err)
             }
         })
@@ -19,25 +19,26 @@ module.exports={
         var sql = `select * from brand where brand_name='${req.body.brand_name}'`
         db.query(sql, (err, result)=>{
             try{
-                if(err) throw err
+                if(err) throw {error:true, msg:'Brand name not found'}
                 if(result.length===0){
                     
-                var sql1 = `update brand set ? where id=${id}`
-                db.query(sql1, req.body, (err1,result1)=>{
-                    try{
-                        if(err1) throw err1
-                        res.send('success')
-                    }
-                    catch(err1){
-                        res.send('failed to update')
-                    }
+                    var sql1 = `update brand set ? where id=${id}`
+                    db.query(sql1, req.body, (err1,result1)=>{
+                            if(err1) throw {error:true, msg:'Failed while updating'}
+                            var sql2 = `select * from brand`
+                            db.query(sql2, (err2, result2)=>{
+                              
+                                    if(err2) throw {error:true, msg : 'Error in database'}
+                                    res.send(result2)
+                             
+                            })
                 })
                 }else{
-                    res.send('brand name is exist')
+                    res.send({error:true, msg : 'Brand name exist'})
                 }
         }
         catch(err){
-            res.send(err.message)
+            res.send(err)
         }
         })
     },
@@ -46,35 +47,29 @@ module.exports={
         var sql = `select * from brand where brand_name='${req.body.brand_name}'`
         db.query(sql, (err, result)=>{
             try{
-                if(err) throw err
+                if(err) throw {error:true, msg : 'Error in database'}
                 if(result.length===0){
                 var sql1 = `insert into brand set ?`
                 db.query(sql1, req.body, (err1,result1)=>{
-                    try{
-                        if(err1) throw err1
+                   
+                        if(err1) throw {error:true, msg : 'Error while inserting data'}
                         var sql2 = `select * from brand`
                         db.query(sql2, (err2, result2)=>{
-                            try{
-                                if(err2) throw err2
-                                res.send(result1)
-                            }
-                            catch(err2){
-                                res.send(err2.message)
-                            }
+                          
+                                if(err2) throw {error:true, msg : 'Error in database'}
+                                res.send(result2)
+                         
                         })
-                    }
-                    catch(err1){
-                        res.send(err1.message)
-                    }
+                  
                     
                 })
             }else{
-                res.send('brand name is exist')
+                res.send({error:true, msg : 'Brand name exist'})
             }
         
             }
             catch(err){
-                res.send(err.message)
+                res.send(err)
             }
         })
     },
@@ -83,20 +78,15 @@ module.exports={
         var sql = `delete from brand where id=${id}`
         db.query(sql, (err,result)=>{
             try{
-                if(err)throw err
+                if(err)throw {error:true, msg : 'Error while deleting data'}
                 var sql1 = `select * from brand`
                 db.query(sql1, (err1, result1)=>{
-                    try{
-                        if(err1) throw err1
+                        if(err1) throw {error:true, msg : 'Error in database'}
                         res.send(result1)
-                    }
-                    catch(err1){
-                        res.send(err1.message)
-                    }
                 })
             }
             catch(err){
-                res.send(err.message)
+                res.send(err)
             }
         })
     }

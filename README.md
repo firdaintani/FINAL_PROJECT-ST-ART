@@ -10,13 +10,14 @@ Sudah memakai mysql namun di page untuk menampilkan produk masih disimpan di sta
 2. Register sudah menggunakan verifikasi email
 3. Manage Brand dari produk (CRUD)
 4. Manage Category dari produk (CRUD)
-5. Menampilkan list produk (data masih disimpan di state)
-6. Menampilkan detail produk (data masih static disimpan di state)
+5. Menampilkan list produk (data sudah dari db)
+6. Menampilkan detail produk (data sudah dari db)
 7. Mengatur link untuk sorting produk
 8. API sudah menggunakan controller dan router
-
-## KENDALA
-- pada database, masih bingung menentukan kolom untuk tabel cart dan history
-- menentukan ux yang tepat
-
-## TUGAS : bisa 
+9. manage produk
+10. add to cart
+11. menampilkan data cart
+12. mengubah qty di cart
+13. menghapus cart
+14. checkout (tp masih belum kirim email utk info total pembayaran)
+15. admin merubah status transaksi

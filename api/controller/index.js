@@ -4,11 +4,12 @@ var productController = require('./productController')
 var brandController = require('./brandController')
 var authController = require('./authController')
 const cartController = require('./cartController')
+const transactionController = require('./transactionController')
 
 module.exports={
     userController,
     categoryController,
     productController,
     brandController,
-    authController, cartController
+    authController, cartController, transactionController
 }

@@ -53,14 +53,22 @@ module.exports={
     },
     deleteProduct : (req,res)=>{
         var id = req.params.id
-        var sql = `delete from product where id=${id}`
+        var sql = `select product_image from product where id=${id}`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'error in database'}
-                var sql1 = `select * from show_product_list`
+                fs.unlinkSync(result[0].product_image)
+
+                var sql1 = `delete from product where id=${id}`
+        
                 db.query(sql1, (err1, result1)=>{
                     if(err1) throw {error:true, msg:'error in database'}
-                    res.send(result1)
+                    var sql2 = `select * from show_product_list`
+                    db.query(sql2, (err2,result2)=>{
+                        if(err2) throw {error:true, msg:'error in database'}
+                        res.send(result2)
+
+                    })
                 })
             }
             catch(err){

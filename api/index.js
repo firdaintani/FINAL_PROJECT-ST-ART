@@ -7,8 +7,10 @@ var cors = require('cors')
 app.use(cors())
 app.use(bodyParser.json())
 const port = 4000
-const {userRouter, categoryRouter, productRouter, brandRouter, authRouter, cartRouter} = require('./router')
+const {userRouter, categoryRouter, productRouter, brandRouter, authRouter, cartRouter, transactionRouter} = require('./router')
+
 //HOME
+
 app.use('/uploads',express.static('uploads'))
 
 app.get('/', (req,res)=>{
@@ -20,4 +22,5 @@ app.use('/product', productRouter)
 app.use('/brand', brandRouter)
 app.use(authRouter)
 app.use('/cart', cartRouter)
+app.use('/transaction', transactionRouter)
 app.listen(port, ()=>console.log('aktif di port '+port))

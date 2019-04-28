@@ -86,11 +86,19 @@ module.exports={
         },
         
     resendEmail : (req,res)=>{
-        var to= req.body.email
+        var email= req.body.email
         var username = req.body.username
         var code_verify = Math.floor(Math.random()*Math.pow(10,6))
-      
-        var mailOptions =sendEmail(username,to,code_verify)
+        var subject = `Please verify your account`
+        var content = `
+        <div>
+        <h1>Please verify your account with the code.</h1>
+        <p>your code is : <strong>${code_verify}</strong> </p>
+        <h3>Click this <a href='http://localhost:3000/verify?username=${username}'>link</a> to verify your account </h3>
+        
+        </div>
+        `
+        var mailOptions =sendEmail(subject, email, content)
         var sql = `update user set code_verify=${code_verify} where username='${username}'`
         db.query(sql,(err,result)=>{
             try{

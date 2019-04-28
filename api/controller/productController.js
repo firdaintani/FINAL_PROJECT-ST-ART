@@ -49,7 +49,6 @@ module.exports={
     catch(err){
         res.send(err)
     }
-
     },
     deleteProduct : (req,res)=>{
         var id = req.params.id

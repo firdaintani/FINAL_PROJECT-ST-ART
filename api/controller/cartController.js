@@ -1,6 +1,9 @@
 const db = require('../database')
 const sendEmail = require('../helpers/sendEmail')
 const transporter = require('../helpers/nodemailer')
+const fs = require('fs')
+var hbrs = require('handlebars')
+const pdf = require('html-pdf')
 
 module.exports = {
     addToCart: (req, res) => {
@@ -57,7 +60,7 @@ module.exports = {
     },
     getCart: (req, res) => {
         var username = req.query.username
-        var sql = `select cart.id, name,discount, price, quantity, product_image from cart join product on cart.product_id=product.id where username='${username}'`
+        var sql = `select cart.id, name,discount, price, quantity, product_image,stock from cart join product on cart.product_id=product.id where username='${username}'`
         db.query(sql, (err, result) => {
             try {
                 if (err) throw {
@@ -80,7 +83,7 @@ module.exports = {
                     error: true,
                     msg: "Error in database while deleting data"
                 }
-                var sql1 = `select cart.id, name,discount, price, quantity, product_image from cart join product on cart.product_id=product.id where username='${username}'`
+                var sql1 = `select cart.id, name,discount, price, quantity,stock, product_image from cart join product on cart.product_id=product.id where username='${username}'`
                 db.query(sql1, (err1, result1) => {
                     if (err1) throw {
                         error: true,
@@ -105,7 +108,7 @@ module.exports = {
                     msg: "Error while updating quantity"
                 }
                 // res.send("success")
-                var sql1 = `select cart.id, name,discount, price, quantity, product_image from cart join product on cart.product_id=product.id where username='${username}'`
+                var sql1 = `select cart.id, name,discount, price, quantity, product_image, stock from cart join product on cart.product_id=product.id where username='${username}'`
                 db.query(sql1, (err1, result1) => {
                     if (err1) throw {
                         error: true,
@@ -126,14 +129,12 @@ module.exports = {
         var mm = today.getMonth();
         var yyyy = today.getFullYear();
         var month = ['January', 'February', 'March', 'April', 'Mei', 'June', 'July', 'August', 'September', 'October', 'November', 'Desember']
-        var order_date = dd + ' ' + month[mm] + ' ' + yyyy + ' ' + today.getHours() + ':' + today.getMinutes()
+        var order_date = dd + ' ' + month[mm] + ' ' + yyyy + ' ' + today.getHours() + ':' + today.getMinutes()+':'+today.getSeconds()
+        var payment_due = (dd+2) + ' ' + month[mm] + ' ' + yyyy + ' ' + today.getHours() + ':' + today.getMinutes()+':'+today.getSeconds()
         var data = {
             ...req.body,
-            order_date
+            order_date, payment_due
         }
-
-        var subject = `Checkout Success`
-      
         var sql = `insert into order_user set ?`
         db.query(sql, data, (err, result) => {
             try {
@@ -141,7 +142,7 @@ module.exports = {
                     error: true,
                     msg: 'Failed while inserting data'
                 }
-                var sql1 = `select cart.id,product_id, quantity, product.price, product.discount from cart join product on cart.product_id=product.id where username='${data.username}'`
+                var sql1 = `select cart.id,product_id,product.name, quantity, product.price, product.discount, product.stock from cart join product on cart.product_id=product.id where username='${data.username}'`
                 db.query(sql1, (err1, result1) => {
                     if (err1) throw {
                         error: true,
@@ -155,19 +156,16 @@ module.exports = {
                         }
                         var id = result2[0].id
                         var newArr = []
+                    
                         result1.map((val) => {
-                            newArr.push(`(${id},${val.product_id},${val.quantity}, ${val.price-(val.price*(val.discount/100))})`)
+                            if(val.stock > 0){
+                                newArr.push(`(${id},${val.product_id},${val.quantity}, ${val.price-(val.price*(val.discount/100))})`)
+                                
+                            }
                         })
-                        var content = `
-                        <div>
-                        <h1>Checkout Success!</h1>
-                        <h3>The total payment is : <strong>Rp. ${data.total}</strong> </h3>
-                        <p>Immediately pay your purchases and send the picture of your payment so the transaction can be processed </p>
-                        <p>Click this <a href='http://localhost:3000/upload-payment/${id}'>link</a> to upload your payment </p>        
-                        </div>
-                        `
+    
                         var sql3 = `insert into order_item (id_order, id_product, qty, total) VALUES ${newArr.join(',')}`
-                        db.query(sql3, (err3, result3) => {
+                        db.query(sql3, (err3,result3)=>{
                             if (err3) throw {
                                 error: true,
                                 msg: "Error while inserting to order item"
@@ -176,6 +174,7 @@ module.exports = {
                             result1.map((val) => {
                                 arrId.push(val.id)
                             })
+
                             var sql4 = `delete from cart where id in (${arrId.join(',')})`
                             db.query(sql4, (err4, result4) => {
                                 if (err4) throw {
@@ -189,32 +188,41 @@ module.exports = {
                                         error: true,
                                         msg: "Error while get email"
                                     }
-
-                                    var mailOptions = sendEmail(subject, result5[0].email, content)
-                                    transporter.sendMail(mailOptions, (err6, result6) => {
-                                        if (err) throw {
-                                            error: true,
-                                            msg: 'error while sending the email'
-                                        }
-                                        // res.send(result6)
-                                        var sql6= `
-
-                                        CREATE EVENT checkout_${id}
-                                        ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 3 minute
-                                        ON COMPLETION NOT PRESERVE
-                                            DO
-                                            BEGIN
-                                        delete from order_item where id_order=${id};
-                                        delete from order_user where id=${id};
-                                        END ;
-
-                                        `
-                                        db.query(sql6, (err7,result7)=>{
-                                            if(err7) throw err7
-                                            res.send(result7)
-                                        })
+                                            var subject = `Checkout Success`
+                                            var content = `
+                                            <div>
+                                            <h1>ST-ART Checkout Success</h1>
+                                            <h3>The total payment is : <strong>Rp. ${data.total}</strong> </h3>
+                                            <p>Immediately pay your purchases and send the picture of your payment before ${payment_due} so the transaction can be processed. </p>
+                                            <p>Click this <a href='http://localhost:3000/upload-payment/${id}'>link</a> to upload your payment picture </p>        
+                                            </div>
+                                            `
+                                            // var content = require('../helpers/template/invoice.html')
+                                            var mailOptions = sendEmail(subject, result5[0].email, content)
+                                            // console.log(mailOptions)
+                                            transporter.sendMail(mailOptions, (err6, result6) => {
+                                                if (err6) throw {
+                                                    error: true,
+                                                    msg: 'error while sending the email'
+                                                }
+                                                // res.send(result6)
+                                                var sql6= `
+                                                CREATE EVENT checkout_${id}
+                                                ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 2 day
+                                                ON COMPLETION NOT PRESERVE
+                                                DO
+                                                BEGIN
+                                                delete from order_item where id_order=${id};
+                                                delete from order_user where id=${id};
+                                                END ;
+                                                `
+                                                db.query(sql6, (err7,result7)=>{
+                                                    if(err7) throw err7
+                                                    res.send(result7)
+                                                })
+                                            })
+        
                                     })
-                                })
 
                             })
                         })
@@ -224,5 +232,7 @@ module.exports = {
                 res.send(err)
             }
         })
-    }
+    },
+
+    
 }

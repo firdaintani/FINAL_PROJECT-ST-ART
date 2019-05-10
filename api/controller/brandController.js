@@ -2,7 +2,7 @@ var db = require('../database')
 
 module.exports={
     getAllBrand: (req,res)=>{
-        var sql ='select * from brand'
+        var sql ='select * from brand order by brand_name asc'
         db.query(sql,(err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'error in database'}
@@ -43,11 +43,12 @@ module.exports={
         })
     },
     addBrand : (req,res)=>{
-        
-        var sql = `select * from brand where brand_name='${req.body.brand_name}'`
+        console.log(req.body.brand_name)
+        var sql = `select * from brand where brand_name="${req.body.brand_name}"`
         db.query(sql, (err, result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error in database'}
+                // if(err) throw err
                 if(result.length===0){
                 var sql1 = `insert into brand set ?`
                 db.query(sql1, req.body, (err1,result1)=>{
@@ -56,7 +57,7 @@ module.exports={
                         var sql2 = `select * from brand`
                         db.query(sql2, (err2, result2)=>{
                           
-                                if(err2) throw {error:true, msg : 'Error in database'}
+                                if(err2) throw {error:true, msg : 'Error while get all'}
                                 res.send(result2)
                          
                         })
@@ -89,5 +90,19 @@ module.exports={
                 res.send(err)
             }
         })
+    },
+    selectBrandByCat : (req,res)=>{
+        var category_id =req.query.category_id
+        var sql = `select brand.id, brand_name from product join brand on product.brand_id=brand.id where product.category_id=${category_id} group by brand.id order by brand_name ASC`
+        db.query(sql,(err,result)=>{
+            try{
+                if(err) throw {error:true, msg : 'error in database'}
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    
     }
 }

@@ -9,7 +9,7 @@ module.exports={
         var password = req.query.password
         var passwordBr = cryp.createHmac('sha256', 'key').update(password).digest('hex')
     
-        var sql = `select * from user where username='${username}' and password='${passwordBr}'`
+        var sql = `select count(product_id) as jml_cart, u.username, role, verified from user u left join cart c on u.username=c.username where u.username='${username}' and u.password='${passwordBr}'`
         db.query(sql, (err, result)=>{
             try{
                 if(err) throw {error:true, msg: 'Username or password wrong. Please check again.'}
@@ -27,7 +27,16 @@ module.exports={
         var passwordBr = cryp.createHmac('sha256', 'key').update(pass).digest('hex')
   
         var code_verify = Math.floor(Math.random()*Math.pow(10,6))
-        var mailOptions =sendEmail(data.username,data.email, code_verify)
+        var subject = `Please verify your account`
+        var content = `
+        <div>
+        <h1>Please verify your account with the code.</h1>
+        <p>your code is : <strong>${code_verify}</strong> </p>
+        <h3>Click this <a href='http://localhost:3000/verify?username=${data.username}'>link</a> to verify your account </h3>       
+        </div>
+        `
+        var mailOptions =sendEmail(subject, req.body.email, content)
+        // var mailOptions =sendEmail(data.username,data.email, subject)
         var data = {...req.body, password:passwordBr, code_verify}
         // var sql = `select * from user where username="${req.body.username}"`   
         // db.query(sql, (err,result)=>{
@@ -94,8 +103,7 @@ module.exports={
         <div>
         <h1>Please verify your account with the code.</h1>
         <p>your code is : <strong>${code_verify}</strong> </p>
-        <h3>Click this <a href='http://localhost:3000/verify?username=${username}'>link</a> to verify your account </h3>
-        
+        <h3>Click this <a href='http://localhost:3000/verify?username=${username}'>link</a> to verify your account </h3>       
         </div>
         `
         var mailOptions =sendEmail(subject, email, content)

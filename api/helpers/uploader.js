@@ -2,7 +2,7 @@ var multer = require('multer')
 const storageConfig = multer.diskStorage({
     // menentukan tempat menyimpan file
     destination : (req,file,cb)=>{
-        cb (null, './uploads')
+        cb (null, './uploads/product')
     } ,
     // nama file
     filename : (req,file,cb)=>{

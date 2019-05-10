@@ -37,11 +37,12 @@ module.exports={
         if(req.file.size > 5*1024*1024) throw {error:true, msg: 'image too large'}
         var path = req.file.path.split('\\')
 
-        var data = {...JSON.parse(req.body.data), product_image : 'uploads/'+path[1]}
+        var data = {...JSON.parse(req.body.data), product_image : 'uploads/product/'+path[2]}
         var sql = 'insert into product set ? '
         db.query(sql, data, (err,result)=>{
                 
-                if (err) throw {error:true, msg : 'error while inserting data'}
+                // if (err) throw {error:true, msg : 'error while inserting data'}
+                if(err) throw err
                 res.send('berhasil')
         })
 
@@ -114,7 +115,7 @@ module.exports={
         }
     },
     getProductList : (req,res)=>{
-        var sql = `select product.id, name, brand.brand_name, price, discount, product_image from product join brand on product.brand_id = brand.id;`
+        var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id;`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
@@ -127,7 +128,7 @@ module.exports={
     },
     getProductDetail : (req,res)=>{
         var id = req.params.id
-        var sql = `select product.id, name, brand.brand_name, price, stock,product_image, description from product join brand on product.brand_id=brand.id where product.id=${id}`
+        var sql = `select product.id, name, brand.brand_name, price, stock,product_image, description, discount from product join brand on product.brand_id=brand.id where product.id=${id}`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
@@ -137,5 +138,76 @@ module.exports={
                 res.send(err)
             }
         })
+    },
+    search : (req,res)=>{
+        var category = req.query.category
+        var key = req.query.key
+        var brand = req.query.brand
+        var price_min = req.query.price_min
+        var price_max = req.query.price_max
+        var sortby = req.query.sortby
+
+        var link = []
+        var newLink = ''
+        if(key){
+            link.push({
+                params : `product.name like '%${key}%'`
+            })
+        }
+        if(category){
+            link.push({
+                params : 'product.category_id='+category
+            })
+        }
+        if(brand){
+            link.push({
+                params : 'product.brand_id='+brand
+            })
+        }
+        if(price_min){
+            link.push({
+                params : '(product.price-(product.price*(product.discount/100)))>='+price_min
+            })
+        }
+        if(price_max){
+            link.push({
+                params : '(product.price-(product.price*(product.discount/100)))<='+price_max
+            })
+        }
+        
+
+        for(var i =0; i< link.length; i++){
+            if(i===0){
+              newLink+='where ' + link[i].params
+            }else{
+              newLink += ' and ' + link[i].params
+            }
+          }
+        //   console.log(sortby)
+          if(sortby){
+            var sort = sortby.split('-')
+            if(sort[0]==='date'){
+                newLink+=` order by product.id `+sort[1]        
+            }else if(sort[0]==='name'){
+                newLink+=` order by product.name `+sort[1]  
+             
+            }else{
+                newLink+=` order by product.price `+sort[1]  
+                  
+            }
+        }
+
+          // console.log('masuk')
+        var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id ${newLink};`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    
     }
 }

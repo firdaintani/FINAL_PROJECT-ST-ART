@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="./helpers/template/style.css"> -->
+    <!-- <title>Invoice</title> -->
+    <style type="text/css">
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+@import url('https://fonts.googleapis.com/css?family=Playfair+Display');
+
+
+body {  font-family: 'Raleway', sans-serif;
+	zoom : 70%;
+}
+html,body{
+        height:297mm;
+        width:210mm;
+    }
+.kotak{
+	width: 100%;
+	height: 70px;
+	background-color: #f6f6f6;
+	
+	margin-top: 60px;
+}
+
+.kotak-brand{
+
+	position: absolute;
+	width: 400px;
+	background-color: #373737;
+	color: white;
+	height: 150px;
+	margin-top: -40px;
+	margin-left: 280px;
+	/*display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+*/
+	text-align: center;
+}
+
+.kotak-info-payment{
+	width: auto;
+	margin-top: 25px;
+	/*height: 150px;*/
+	/*background-color: #f6f6f6;*/
+	 color: white;
+    background-color: #373737;
+}
+
+#brand-name {
+	font-size: 60px;
+	margin-top: -10px;
+    font-family: 'Playfair Display', serif;
+   
+}
+
+.thead-table{
+	/*background-color: #373737;*/
+	/*color: white;*/
+	text-align: center;
+}
+
+.alamat{
+	padding-top: 50px;
+	/*justify-content: center;*/
+	/*margin-left: 29%;
+	width: 40%;*/
+	font-size: 14px;
+	text-align: center;
+}
+.row{
+	 width: 100%;
+}
+.table{
+	margin-top: 40px;
+}
+.background-grey{
+	background-color: #f6f6f6 !important;
+}
+
+    </style>
+  </head>
+  <body>
+  	<div style="width: 100%"  class="container">
+	    <div class="kotak-brand">				
+			<p id='brand-name'>ST-ART</p>
+			<h6>Art Supplies</h6>
+	    </div>
+
+	    <div class="kotak"></div>
+	    <div class="alamat">
+		  	<p>Jl. BSD Green Office Park,GOP 9 - G Floor BSD City,Sampora</p>
+		  	<p style="margin-top: -14px !important;">Cisauk, Tangerang, Banten 15345</p>
+		  	<p style="margin-top: -14px !important;">www.st-art.com</p>
+	    	
+	    </div>
+	  		<!-- <div class="row">
+	  			<div class="col-xs-6">
+	  				INVOICE TO : <br>
+	  				{{name}}
+	  			</div>
+	  			<div class="col-xs-6" style="text-align: right;">
+	  				{{order_date}}<br><br>
+	  				INVOICE : #{{id_order}}
+	  			</div>
+	  	</div> -->
+	  	<table style="width: 100%">
+	  		<tr>
+	  			<td>
+	  				INVOICE TO : <br>
+	  				{{name}}
+	  			</td>
+	  			<td style="text-align: right;">
+	  				{{order_date}}<br><br>
+	  				INVOICE : #{{id_order}}
+	  			</td>
+	  		</tr>
+	  	</table>
+	  	<table class="table">
+	  		<thead class="thead-table">
+	  		<!-- <thead> -->
+	  			<td>No</td>
+	  			<td>Item</td>
+	  			<td>Quantity</td>
+	  			<td>Total</td>
+	  		</thead>
+	  		<tbody style="text-align: center;">
+	  			
+	  			{{#each tablebody}}
+	  				<tr>
+                        <td>{{no}}</td>
+                        <td style="text-align: left">{{product_name}}</td>
+                        <td>{{quantity}}</td>
+                        <td>Rp. {{total_per_item}}</td>
+                        
+                        </tr>
+	  			{{/each}}
+	  		</tbody>
+	  		<tfoot>
+	  			<tr  align="center">
+	  				<td></td>
+	  				<td></td>
+	  				
+	  				<td><div class="background-grey">Total</div></td>
+	  					
+	  				
+	  				<td>Rp. {{total}}</td>
+	  			</tr>
+	  		</tfoot>
+	  	</table>
+	  	<center>
+		  	<!-- <p style="margin-top: 30px; font-size:21px">PAYMENT TERMS</p>
+		  	<p style="margin-top: -12px">Pay and upload your payment picture before {{payment_due}}</p> -->
+		<div class="kotak-info-payment">
+			<p style="font-size: 21px;padding-top: 20px">PAYMENT DETAILS</p>
+			<p><strong>ACCOUNT NAME</strong> : START Supplies</p>
+			<p style="margin-top: -12px"><strong>BANK</strong> BRI</p>
+			<p style="margin-top: -12px; padding-bottom:20px;"><strong>ACCOUNT NO.</strong> 034 011 000 723 323 </p>
+		</div>
+  	
+		</center>
+		</div>
+  </body>
+</html>

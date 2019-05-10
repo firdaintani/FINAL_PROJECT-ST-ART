@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+@import url('https://fonts.googleapis.com/css?family=Playfair+Display');
+
+
+body {  font-family: 'Raleway', sans-serif;
+
+}
+
+.kotak{
+	width: 100%;
+	height: 70px;
+	background-color: #f6f6f6;
+	/*margin-top: 60px;*/
+	margin-top: 60px;
+}
+
+.kotak-brand{
+
+	position: absolute;
+	width: 30%;
+	background-color: #373737;
+	color: white;
+	height: 150px;
+	margin-top: -40px;
+	margin-left: 26.3%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+}
+
+.kotak-info-payment{
+	/*width: 30%;*/
+	margin-top: 25px;
+	height: 150px;
+	background-color: #f6f6f6;
+}
+
+#brand-name {
+	font-size: 60px;
+	margin-top: -10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.thead-table{
+	background-color: #373737;
+	color: white;
+}
+
+.alamat{
+	padding-top: 50px;
+	/*justify-content: center;*/
+	/*margin-left: 29%;
+	width: 40%;*/
+	font-size: 14px;
+	text-align: center;
+}

@@ -209,5 +209,17 @@ module.exports={
             }
         })
     
+    },
+    discount : (req,res)=>{
+        var sql = `select * from show_product_list where discount>0 order by discount desc`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
     }
 }

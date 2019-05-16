@@ -54,8 +54,9 @@ module.exports={
         })
     },
     getPostalCode : (req,res)=>{
-        var urban = req.params.urban
-        var sql = `select postal_code, id from db_postal_code_data where urban='${urban}'`
+        var urban = req.query.urban
+        var sub = req.query.sub
+        var sql = `select postal_code, id from db_postal_code_data where urban='${urban}' and sub_district='${sub}'`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg :'error while get urban data'}

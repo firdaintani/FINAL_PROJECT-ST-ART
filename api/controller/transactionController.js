@@ -21,9 +21,22 @@ module.exports={
 
         })
     },
+    getAddressDetail : (req,res)=>{
+        var sql=`select * from detail_transaction where id=${req.params.id};`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error:true, msg : 'Error while getting data'}
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+
+        })
+    },
     getTransactionByUsername : (req,res)=>{
         var username = req.query.username
-        var sql = `select id, order_date, total, payment_due from order_user where status='1' and username='${username}' order by id desc `
+        var sql = `select id, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date, total,DATE_FORMAT(payment_due, "%d %M %Y %H:%i:%s") as payment_due from order_user where status='1' and username='${username}' order by id desc `
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error while getting data'}
@@ -36,7 +49,7 @@ module.exports={
     },
     getOnProcessTransactionByUsername : (req,res)=>{
         var username = req.query.username
-        var sql = `select id, order_date, total from order_user where status=2 and username='${username}' order by id desc`
+        var sql = `select id, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date, total from order_user where status=2 and username='${username}' order by id desc`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error while getting data'}
@@ -50,7 +63,7 @@ module.exports={
         })
     },getOnProcessTransaction : (req,res)=>{
       
-        var sql = `select id, order_date, total,payment_picture from order_user where status=2 order by id desc`
+        var sql = `select id, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date, total,payment_picture from order_user where status=2 order by id desc`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error while getting data'}
@@ -81,19 +94,23 @@ module.exports={
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'error while updating status'}
-                var sql1 = `select user.username,email, order_date,order_user.total as alltotal, product.name, qty, order_item.total from order_item join product on order_item.id_product=product.id join order_user on order_user.id=order_item.id_order join user on order_user.username=user.username where id_order=${id};
-                `
+                var sql1 = `select * from for_pdf where id=${id};`
                 db.query(sql1, (err1,result1)=>{
                     if(err1) throw {error:true, msg:'error while retrieving order data'}
                     var isitable = []
                     result1.map((val, index) => {
                             isitable.push({no: (index+1), product_name : val.name, quantity: val.qty, total_per_item : val.total})
                     })
+                    console.log(result1)
+                    var address = `${result1[0].address}, ${result1[0].urban}, ${result1[0].sub_district}`
+                    var address2 = `${result1[0].city}, ${result1[0].province_name} `
+                    var postal_code = result1[0].postal_code
+                    
                     fs.readFile('./helpers/template/invoice.html', {encoding : 'utf-8'}, (err,readResult)=>{
                         if(err) throw err
                        console.log(readResult)
                         var template = hbrs.compile(readResult)
-                        var data ={name : result1[0].username , order_date:result1[0].order_date,id_order:id, total:result1[0].alltotal, tablebody : isitable}
+                        var data ={name : result1[0].username , order_date:result1[0].order_date,id_order:id, total:result1[0].alltotal, tablebody : isitable, address : address, address2 : address2, postal_code : postal_code}
                         var hasilHbrs = template(data)
                         console.log(isitable)
                         // res.send(hasilHbrs)
@@ -115,7 +132,7 @@ module.exports={
                             <div>
                             <h1>ST-ART Payment Confirmed</h1>
                             
-                            <p>Terima kasih sudah berbelanja di ST-ART. Berikut kami lampirkan Invoice pembelanjaan anda : </p>
+                            <p>Thank you for shopping at ST-ART. Here we attach your purchase invoice : </p>
                                 
                             </div>
                             `
@@ -133,20 +150,13 @@ module.exports={
                                     error: true,
                                     msg: 'error while sending the email'
                                 }
-                                var sql2 = `select * from order_user where status=3`
-                                db.query(sql2, (err2,result2)=>{
-                                    if(err1) throw {error:true, msg: 'error while retrieving data'}
-                                    res.send(result2)
-                                })
+                               res.send(result)
                             })
                         })
                     })
 
                     
                 })
-                
-                
-                
                 
             }
             catch(err){
@@ -168,7 +178,7 @@ module.exports={
     }, 
     getFinishedTransactionUser : (req,res)=>{
         var username = req.query.username
-        var sql = ` select id, total, order_date from order_user where status=3 and username='${username}' order by id desc`
+        var sql = ` select id, total, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date from order_user where status=3 and username='${username}' order by id desc`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'error in db'}
@@ -238,7 +248,7 @@ module.exports={
     },
     cancelPayment : (req,res)=>{
         var id = req.params.id
-        var sql = `update order_user set status=1 where id=${id}`
+        var sql = `update order_user set status=1, payment_due=now()+interval 2 day where id=${id}`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw err
@@ -274,6 +284,68 @@ module.exports={
                     })
                 })
                 })
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    },
+    
+    getTotal : (req,res)=>{
+        console.log(req.params.id)
+        var sql = `select total,DATE_FORMAT(payment_due, "%d %M %Y %H:%i:%s") as payment_due, account_name, account_number, bank_pict from order_user join payment_account on order_user.payment_bank=payment_account.id where order_user.id=${req.params.id}`
+        db.query(sql, (err,result)=>{
+            try{
+                // if(err) throw {error:true, msg: 'error while gtting total'}
+                if(err) throw err
+                console.log(result)
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    },
+    bank : (req,res)=>{
+        var sql = `select * from payment_account`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error:true, msg: 'error while gtting payment account'}
+                res.send(result)
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    },
+    search : (req,res)=>{
+        var username = req.query.u
+        var month = req.query.m
+        var status = req.query.s
+        var arr=[]
+        var newLink=''
+        if(username){
+            arr.push(`username like '%${username}%'`)
+        }
+        if(month){
+            arr.push(`month(order_date)=${month}`)
+        }
+        if(status){
+            arr.push(`status=${status}`)
+        }
+        for(var i =0; i< arr.length; i++){
+            if(i===0){
+              newLink+='where ' + arr[i]
+            }else{
+              newLink += ' and ' + arr[i]
+            }
+          }
+        var sql = `select id, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date, total,DATE_FORMAT(payment_due, "%d %M %Y %H:%i:%s") as payment_due from order_user ${newLink} `
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw err
+                res.send(result)
+            
             }
             catch(err){
                 res.send(err)

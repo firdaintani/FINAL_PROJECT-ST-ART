@@ -98,7 +98,7 @@ module.exports={
         var email= req.body.email
         var username = req.body.username
         var code_verify = Math.floor(Math.random()*Math.pow(10,6))
-        var subject = `Please verify your account`
+        var subject = `ST-ART Verify Your Account`
         var content = `
         <div>
         <h1>Please verify your account with the code.</h1>

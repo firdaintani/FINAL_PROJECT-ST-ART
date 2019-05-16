@@ -13,8 +13,8 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 @import url('https://fonts.googleapis.com/css?family=Playfair+Display');
 
-
-body {  font-family: 'Raleway', sans-serif;
+body {  
+	font-family: 'Raleway', sans-serif;
 	zoom : 70%;
 }
 html,body{
@@ -102,21 +102,15 @@ html,body{
 		  	<p style="margin-top: -14px !important;">www.st-art.com</p>
 	    	
 	    </div>
-	  		<!-- <div class="row">
-	  			<div class="col-xs-6">
-	  				INVOICE TO : <br>
-	  				{{name}}
-	  			</div>
-	  			<div class="col-xs-6" style="text-align: right;">
-	  				{{order_date}}<br><br>
-	  				INVOICE : #{{id_order}}
-	  			</div>
-	  	</div> -->
+	  	
 	  	<table style="width: 100%">
 	  		<tr>
 	  			<td>
 	  				INVOICE TO : <br>
-	  				{{name}}
+						{{name}} <br>
+						DELIVERY ADDRESS : <br>
+						{{address}} <br>
+						{{address2}} {{postal_code}}
 	  			</td>
 	  			<td style="text-align: right;">
 	  				{{order_date}}<br><br>
@@ -157,15 +151,7 @@ html,body{
 	  		</tfoot>
 	  	</table>
 	  	<center>
-		  	<!-- <p style="margin-top: 30px; font-size:21px">PAYMENT TERMS</p>
-		  	<p style="margin-top: -12px">Pay and upload your payment picture before {{payment_due}}</p> -->
-		<div class="kotak-info-payment">
-			<p style="font-size: 21px;padding-top: 20px">PAYMENT DETAILS</p>
-			<p><strong>ACCOUNT NAME</strong> : START Supplies</p>
-			<p style="margin-top: -12px"><strong>BANK</strong> BRI</p>
-			<p style="margin-top: -12px; padding-bottom:20px;"><strong>ACCOUNT NO.</strong> 034 011 000 723 323 </p>
-		</div>
-  	
+		    	
 		</center>
 		</div>
   </body>

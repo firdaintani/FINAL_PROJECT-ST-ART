@@ -19,5 +19,6 @@ Sudah memakai mysql namun di page untuk menampilkan produk masih disimpan di sta
 11. menampilkan data cart
 12. mengubah qty di cart
 13. menghapus cart
-14. checkout (tp masih belum kirim email utk info total pembayaran)
-15. admin merubah status transaksi
+14. checkout dgn pemberitahuan total serta link untuk upload bukti pembayaran
+15. saat checkout stock produk berkurang sesuai qty
+16. ketika checkout ada timer, ketika user tidak membayar selama 2 hari setelah checkout, transaksi dibatalkan dan qty produk dikembalikan ke produk

@@ -110,7 +110,8 @@ html,body{
 						{{name}} <br>
 						DELIVERY ADDRESS : <br>
 						{{address}} <br>
-						{{address2}} {{postal_code}}
+						{{address2}} {{postal_code}} <br>
+						{{phone}}
 	  			</td>
 	  			<td style="text-align: right;">
 	  				{{order_date}}<br><br>
@@ -147,7 +148,26 @@ html,body{
 	  					
 	  				
 	  				<td>Rp. {{total}}</td>
-	  			</tr>
+					</tr>
+					<tr  align="center">
+	  				<td></td>
+	  				<td></td>
+	  				
+	  				<td><div class="background-grey">Shipping Fee</div></td>
+	  					
+	  				
+	  				<td>Free</td>
+					</tr>
+					<tr  align="center">
+	  				<td></td>
+	  				<td></td>
+	  				
+	  				<td><div class="background-grey">Total Payment</div></td>
+	  					
+	  				
+	  				<td>Rp. {{total}}</td>
+					</tr>
+					
 	  		</tfoot>
 	  	</table>
 	  	<center>

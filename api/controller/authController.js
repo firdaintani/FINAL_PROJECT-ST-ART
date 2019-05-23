@@ -9,7 +9,7 @@ module.exports={
         var password = req.query.password
         var passwordBr = cryp.createHmac('sha256', 'key').update(password).digest('hex')
     
-        var sql = `select count(product_id) as jml_cart, u.username, role, verified from user u left join cart c on u.username=c.username where u.username='${username}' and u.password='${passwordBr}'`
+        var sql = `select username, role, verified from user where username='${username}' and password='${passwordBr}'`
         db.query(sql, (err, result)=>{
             try{
                 if(err) throw {error:true, msg: 'Username or password wrong. Please check again.'}
@@ -22,10 +22,8 @@ module.exports={
     },  
     registerUser : (req,res)=>{
         var data = req.body
-       
         var pass = req.body.password
         var passwordBr = cryp.createHmac('sha256', 'key').update(pass).digest('hex')
-  
         var code_verify = Math.floor(Math.random()*Math.pow(10,6))
         var subject = `Please verify your account`
         var content = `
@@ -34,59 +32,48 @@ module.exports={
         <p>your code is : <strong>${code_verify}</strong> </p>
         <h3>Click this <a href='http://localhost:3000/verify?username=${data.username}'>link</a> to verify your account </h3>       
         </div>
-        `
+        ` 
         var mailOptions =sendEmail(subject, req.body.email, content)
-        // var mailOptions =sendEmail(data.username,data.email, subject)
         var data = {...req.body, password:passwordBr, code_verify}
-        // var sql = `select * from user where username="${req.body.username}"`   
-        // db.query(sql, (err,result)=>{
-        //     try{
-                // if(err) throw err
-                // if(result.length>0){
-
+        
                 var sql1 = `insert into user set ?`
                 db.query(sql1, data,(err1,result1)=>{
                     try{
                         if(err1) throw {error:true, msg :'Username not available. Please try another username.'}
-                        // var sql2 = `select * from user where username="${req.body.username}"`
-                        // db.query(sql2, (err2,result2)=>{
-                        //     try{
-                        //         if (err2) throw err
-                                    transporter.sendMail(mailOptions,(err,result)=>{
-                                        if(err) throw {error:true, msg:'error while sending the email'}
-                                        res.send(result)
-                                    })
+                            transporter.sendMail(mailOptions,(err,result)=>{
+                                if(err) throw {error:true, msg:'error while sending the email'}
+                                res.send('Register success')
+                            })
                                 
-                                // res.send(result2[0])
-                            }
-                            // catch{
-                            //     res.send(err2.message)
-                            // }
-                        // })
-                    // }
+                        }
+                        
                     catch(err){
-                        console.log(err)
+                     
                         res.send(err)
                     }
                 } )
-            },
-            // else {
-            //     res.send('duplikat')
-            // }
-            // }
-        //     catch{
-        //         res.send('dup')
-        //     }
-        // }) 
-        // }
-        verify : (req,res)=>{
-            // var username = req.query.username
+        },
+        verify : (req,res)=>{            
             var username = req.body.username
-            var sql = `update user set verified=1 where username='${username}'`
+            var code = req.body.code
+            var sql= `select code_verify from user where username='${username}' and code_verify=${code}`
+
+        
             db.query(sql, (err, result)=>{
                 try{
-                    if (err) throw {error:true,msg:'Username not found'}
-                    res.send("You've verified your account. Now you can login to your account")
+                    if (err) throw {error:true,msg:'error in db'}
+                    if(result.length>0){
+                      
+                        var sql2 = `update user set verified=1 where username='${username}'`
+                        db.query(sql2, (err2,result2)=>{
+                            if (err) throw {error:true,msg:'Cant set'}
+                            res.send("You've verified your account. Now you can login to your account")
+    
+                        })
+    
+                    }else{
+                        res.send({error:true,msg:'Wrong code! Check your email to see the code.'})
+                    }
                 }
                 catch(err){
                     res.send(err)
@@ -111,11 +98,7 @@ module.exports={
         db.query(sql,(err,result)=>{
             try{
                 if(err) throw {error:true, msg:'failed create new code'}
-                
-                //  console.log('masuk')
-                
                 transporter.sendMail(mailOptions,(err1,result1)=>{
-                    // try{
                         if(err1) throw {error:true, msg:'failed while sending email'}
                         res.send('success')
          
@@ -126,6 +109,5 @@ module.exports={
                 res.send(err)
             }
         })
-        
-    },
+    }
 }

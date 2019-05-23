@@ -28,7 +28,6 @@ module.exports={
     },
     getKecamatan : (req,res)=>{
         var city = req.params.city
-        // console.log(city)
         var sql = `select sub_district from db_postal_code_data where city='${city}' group by sub_district order by sub_district asc`
         db.query(sql, (err,result)=>{
             try{

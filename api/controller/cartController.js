@@ -58,7 +58,7 @@ module.exports = {
     },
     getCart: (req, res) => {
         var username = req.query.username
-        var sql = `select cart.id, name,discount, price, quantity, product_image,stock from cart join product on cart.product_id=product.id where username='${username}'`
+        var sql = `select cart.id,product_id, name,discount, price, quantity, product_image,stock from cart join product on cart.product_id=product.id where username='${username}'`
         db.query(sql, (err, result) => {
             try {
                 if (err) throw {
@@ -81,7 +81,7 @@ module.exports = {
                     error: true,
                     msg: "Error in database while deleting data"
                 }
-                var sql1 = `select cart.id, name,discount, price, quantity,stock, product_image from cart join product on cart.product_id=product.id where username='${username}'`
+                var sql1 = `select cart.id,product_id, name,discount, price, quantity,stock, product_image from cart join product on cart.product_id=product.id where username='${username}'`
                 db.query(sql1, (err1, result1) => {
                     if (err1) throw {
                         error: true,
@@ -131,21 +131,15 @@ module.exports = {
         var payment_due = (dd+2) + ' ' + month[mm] + ' ' + yyyy + ' ' + today.getHours() + ':' + today.getMinutes()+':'+today.getSeconds()
 
         var data = req.body
+    
         var sql = `insert into order_user (username, total, idAddress, address, order_date, payment_due, payment_bank) VALUE ('${data.username}', ${data.total}, ${data.idAddress}, '${data.address}', str_to_date('${order_date}', '%d %m %Y %H:%i:%s'), str_to_date('${payment_due}', '%d %M %Y %H:%i:%s'), ${data.payment_bank})`
         db.query(sql, (err, result) => {
             try {
                 if (err) throw {
                     error: true,
                     msg: 'Failed while inserting data'
-                    // msg : err
+                    
                 }
-                // if(err) console.log(err)
-                var sql1 = `select cart.id,product_id,product.name, quantity, product.price, product.discount, product.stock from cart join product on cart.product_id=product.id where username='${data.username}'`
-                db.query(sql1, (err1, result1) => {
-                    if (err1) throw {
-                        error: true,
-                        msg: "Error while retrieving data from cart"
-                    }
                     var sql2 = `select id from order_user where username='${data.username}' and order_date=str_to_date('${order_date}', '%d %m %Y %H:%i:%s')`
                     db.query(sql2, (err2, result2) => {
                         if (err2) throw {
@@ -155,12 +149,9 @@ module.exports = {
                         var id = result2[0].id
                         var newArr = []
                     
-                        result1.map((val) => {
-                            if(val.stock > 0){
+                        data.dataCart.map((val) => {
                                 newArr.push(`(${id},${val.product_id},${val.quantity}, ${val.price-(val.price*(val.discount/100))})`)
-                                
-                            }
-                        })
+                            })
     
                         var sql3 = `insert into order_item (id_order, id_product, qty, total) VALUES ${newArr.join(',')}`
                         db.query(sql3, (err3,result3)=>{
@@ -169,7 +160,7 @@ module.exports = {
                                  msg: "Error while inserting to order item"
                             }
                             var arrId = []
-                            result1.map((val) => {
+                            data.dataCart.map((val) => {
                                 arrId.push(val.id)
                             })
 
@@ -202,16 +193,16 @@ module.exports = {
                                                     msg: 'error while sending the email'
                                                 }
                                                 var sql6= `
-                                                CREATE EVENT checkout_${id}
-                                                ON SCHEDULE AT str_to_date('${payment_due}', '%d %M %Y %H:%i:%s')
-                                                ON COMPLETION NOT PRESERVE
-                                                DO
-                                                BEGIN
-                                                delete from order_item where id_order=${id};
-                                                delete from order_user where id=${id};
-                                                END ;
-                                                `
-                               
+                                                    CREATE EVENT checkout_${id}
+                                                    ON SCHEDULE AT str_to_date('${payment_due}', '%d %M %Y %H:%i:%s')
+                                                    ON COMPLETION NOT PRESERVE
+                                                    DO
+                                                    BEGIN
+                                                    UPDATE order_user set status=4 where id=${id};
+                                                    CALL update_stock(${id});
+                                                    END ;
+`
+                                             
                                                 db.query(sql6, (err7,result7)=>{
                                                     if(err7) throw err7
                                                     res.send({id_order: id})
@@ -224,12 +215,24 @@ module.exports = {
                             })
                         })
                     })
-                })
             } catch (err) {
                 res.send(err)
             }
         })
     },
-
+    getQtyProduct : (req,res)=>{
+        var id = req.query.id
+        var username = req.query.username
+        var sql = `select quantity from cart where product_id=${id} and username='${username}'`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error : true, msg:'error while get quantity'}
+                res.send(result)
+            }
+            catch(err){
+                throw err
+            }
+        })
+    }
     
 }

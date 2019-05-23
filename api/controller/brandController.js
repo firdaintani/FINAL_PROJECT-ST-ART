@@ -15,7 +15,6 @@ module.exports={
     },
     editBrand : (req,res)=>{
         var id = req.params.id
-        // var brand_name = req.body.brand_name
         var sql = `select * from brand where brand_name='${req.body.brand_name}'`
         db.query(sql, (err, result)=>{
             try{
@@ -43,12 +42,11 @@ module.exports={
         })
     },
     addBrand : (req,res)=>{
-        console.log(req.body.brand_name)
+      
         var sql = `select * from brand where brand_name="${req.body.brand_name}"`
         db.query(sql, (err, result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error in database'}
-                // if(err) throw err
                 if(result.length===0){
                 var sql1 = `insert into brand set ?`
                 db.query(sql1, req.body, (err1,result1)=>{
@@ -79,7 +77,7 @@ module.exports={
         var sql = `delete from brand where id=${id}`
         db.query(sql, (err,result)=>{
             try{
-                if(err)throw {error:true, msg : 'Error while deleting data'}
+                if(err)throw {error:true, msg : 'Cant delete the brand because it has products in products list!'}
                 var sql1 = `select * from brand`
                 db.query(sql1, (err1, result1)=>{
                         if(err1) throw {error:true, msg : 'Error in database'}

@@ -7,7 +7,6 @@ module.exports={
         db.query(sql,(err,result)=>{
             try{
                 if(err) throw {error : true, msg:'error in database'}
-                // console.log('masuk')
                 res.send(result)
             }
             catch{
@@ -21,7 +20,7 @@ module.exports={
             var data = {...JSON.parse(req.body.newData), category_picture : req.file.path}
             var sql1 = `update category set ? where id=${id}`
                         db.query(sql1, data, (err1,result1)=>{
-                            // console.log('masuk update')
+                          
                  try{
                     if(err1) throw {error:true, msg:'error in database'}
                     fs.unlinkSync(req.body.oldImage)
@@ -30,8 +29,6 @@ module.exports={
                             if(err2) throw {error:true,msg: 'error in database'}
                             res.send(result2)
                     })
-                    // res.redirect('/category/all')
-                    // console.log('udah')
                 }
                     catch(err){
                         res.send(err)
@@ -40,11 +37,8 @@ module.exports={
         }else{
             var sql1 = `update category set ? where id=${id}`
                         db.query(sql1, req.body, (err1,result1)=>{
-                            // console.log('masuk update')
-                 try{
+                    try{
                     if(err1) throw {error:true, msg:'error in database'}
-                    // res.redirect('/category/all')
-                    // console.log('masuksini')
                     var sql2 = `select * from category`
                         db.query(sql2, (err2, result2)=>{ 
                                 if(err2) throw {error:true,msg: 'error in database'}
@@ -58,41 +52,16 @@ module.exports={
     }
     }
     ,
-    //     var sql = `select * from category where category_name='${req.body.category_name}'`
-    //     db.query(sql, (err, result)=>{
-    //         try{
-    //             if(err) throw {error : true, msg:'error in database'}
-    //             if(result.length===0){
-    //             var sql1 = `update category set ? where id=${id}`
-    //             db.query(sql1, req.body, (err1,result1)=>{
-    //                 // console.log('masuk update')
-    //                     if(err1) throw {error:true, msg:'error in database'}
-    //                     var sql2 = `select * from category`
-    //                     db.query(sql2, (err2, result2)=>{ 
-    //                             if(err2) throw {error:true,msg: 'error in database'}
-    //                             res.send(result2)
-    //                     })
-                   
-                   
-    //             })
-    //         }else{
-    //             res.send({error:true, msg:'Category exist'})
-    //         }
-    //     }
-    //     catch(err){
-    //         res.send(err)
-    //     }
-    // })
 
     addCategory : (req,res)=>{
             var cat = JSON.parse(req.body.data)
-            // console.log(cat.category_name)
+        
             var sql = `select * from category where category_name='${cat.category_name}'`
             db.query(sql, (err, result)=>{
                 try{
               
                     if(err) throw {error:true, msg:'error in database'}
-                    // if(err) throw err
+                    
                     if(result.length===0){
         
                         if(req.validation) throw req.validation
@@ -104,14 +73,12 @@ module.exports={
                         db.query(sql1, data, (err1,result1)=>{
                            
                                 if(err1) throw {error:true,msg:'gagal insert'}
-                                // if(err1) throw err1
                                 
                                 res.redirect('/category/all')
                            })
                     }
                     else{
                         res.send({error:true,msg:'category exist'})
-                        // console.log('ada ')
                     }
         
                 }
@@ -126,19 +93,27 @@ module.exports={
         },
     deleteCategory : (req,res)=>{
         var id = req.params.id
-        var sql = `delete from category where id=${id}`
+        var sql = `select category_picture from category where id=${id}`
         db.query(sql, (err,result)=>{
             try{
-                if(err)throw {error:true, msg: 'category not found'}
-                var sql1 = `select * from category`
-                db.query(sql1, (err1, result1)=>{
-                  
-                        if(err1) throw {error:true, msg: 'error in database'}
-                        res.send(result1)
-                   
-                })
+                if(err) throw {error:true, msg:'error while get picture'}
+               
+                var sql1 = `delete from category where id=${id}`
+                db.query(sql1, (err1,result1)=>{
+                    if(err1) return res.send({error:true, msg : 'Cant delete because it has products!'})
+                    var sql2 = `select * from category`
+                    fs.unlinkSync(result[0].category_picture)
+                        db.query(sql2, (err2, result2)=>{
+                          
+                                if(err2) throw {error:true, msg: 'Error in db'}
+                                res.send(result2)
+                           
+                        })
+        
+                })  
+
             }
-            catch(err){
+        catch(err){
                 res.send(err)
             }
         })

@@ -2,8 +2,7 @@ var db = require('./../database')
 var fs = require('fs')
 
 module.exports={
-    getAllProduct : (req,res)=>{
-        // var sql = `select * from product`
+    getProductList : (req,res)=>{
         var sql = `select * from show_product_list`
         
         db.query(sql,(err,result)=>{
@@ -41,8 +40,8 @@ module.exports={
         var sql = 'insert into product set ? '
         db.query(sql, data, (err,result)=>{
                 
-                // if (err) throw {error:true, msg : 'error while inserting data'}
-                if(err) throw err
+                if (err) throw {error:true, msg : 'error while inserting data'}
+              
                 res.send('berhasil')
         })
 
@@ -57,15 +56,21 @@ module.exports={
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'error in database'}
+                // if(err) throw err
                 fs.unlinkSync(result[0].product_image)
-
+              
+               
                 var sql1 = `delete from product where id=${id}`
-        
+               
+                
                 db.query(sql1, (err1, result1)=>{
                     if(err1) throw {error:true, msg:'error in database'}
+                    // if(err1) throw err1
                     var sql2 = `select * from show_product_list`
                     db.query(sql2, (err2,result2)=>{
                         if(err2) throw {error:true, msg:'error in database'}
+                        // if(err2) throw err2
+                        // console.log(result2[0])
                         res.send(result2)
 
                     })
@@ -78,7 +83,7 @@ module.exports={
     },
     updateProduct : (req,res)=>{
         var id = req.params.id
-        console.log(req.file)
+       
         if(req.file){
             var data = {...JSON.parse(req.body.newData), product_image : req.file.path}
             var sql = `update product set ? where id=${id}`
@@ -114,7 +119,7 @@ module.exports={
             })
         }
     },
-    getProductList : (req,res)=>{
+     getAllProduct : (req,res)=>{
         var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id;`
         db.query(sql, (err,result)=>{
             try{
@@ -183,22 +188,31 @@ module.exports={
               newLink += ' and ' + link[i].params
             }
           }
-        //   console.log(sortby)
           if(sortby){
             var sort = sortby.split('-')
             if(sort[0]==='date'){
                 newLink+=` order by product.id `+sort[1]        
             }else if(sort[0]==='name'){
                 newLink+=` order by product.name `+sort[1]  
-             
             }else{
-                newLink+=` order by product.price `+sort[1]  
+                newLink+=` order by (product.price-(product.price*(product.discount/100))) `+sort[1]  
                   
             }
         }
-
-          // console.log('masuk')
         var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id ${newLink};`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
+                res.send(result)
+            }
+            catch(err){
+               res.send(err)
+            }
+        })
+    
+    },
+    productDiscount : (req,res)=>{
+        var sql = `select * from show_product_list where discount>0 and stock>0 order by discount desc limit 10`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
@@ -208,10 +222,9 @@ module.exports={
                 res.send(err)
             }
         })
-    
     },
-    discount : (req,res)=>{
-        var sql = `select * from show_product_list where discount>0 order by discount desc`
+    newArrival : (req,res)=>{
+        var sql = `select * from show_product_list where stock>0 order by id desc limit 10`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}

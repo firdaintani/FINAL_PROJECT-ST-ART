@@ -6,6 +6,8 @@ const authRouter = require('./authRouter')
 const cartRouter = require('./cartRouter')
 const transactionRouter = require('./transactionRouter')
 const provinceRouter = require('./provinceRouter')
+const reportRouter = require('./reportRouter')
+const wishlistRouter = require('./wishlistRouter')
 module.exports={
-    userRouter,categoryRouter, productRouter, brandRouter,authRouter, cartRouter, transactionRouter,provinceRouter
+    userRouter,categoryRouter, productRouter, brandRouter,authRouter, cartRouter, transactionRouter,provinceRouter, reportRouter, wishlistRouter
 }

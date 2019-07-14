@@ -8,12 +8,27 @@ const pdf = require('html-pdf')
 module.exports={
   
     getTransactionDetail : (req,res)=>{
-        var id = req.params.id
-        var sql = `select product_image, name, qty, total from order_item join product on order_item.id_product=product.id where id_order=${id}`
+        var id = req.query.id
+        var sql = `select product_image, name, qty, order_item.total from order_item join product on order_item.id_product=product.id join order_user on order_item.id_order=order_user.id where id_order=${id}
+        `
+
+        if(req.query.username!=='admin'){
+            sql+=`and username='${req.query.username}'`
+
+        }
+
+       
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg : 'Error while getting data'}
-                res.send(result)
+               
+                if(result.length===0){
+                    res.send('id not exist')
+                   
+                }else{
+                   
+                    res.send(result)
+                }
             }
             catch(err){
                 res.send(err)
@@ -273,17 +288,20 @@ module.exports={
     search : (req,res)=>{
         var username = req.query.u
         var month = req.query.m
+        var year = req.query.y
         var sql = `select id,status, DATE_FORMAT(order_date, "%d %M %Y %H:%i:%s") as order_date, total,DATE_FORMAT(payment_due, "%d %M %Y %H:%i:%s") as payment_due`
         var arr=[]
         var newLink=''
         if(username){
-            arr.push(`username like '%${username}%'`)
+            arr.push(`username='${username}'`)
             
         }else{
             sql+=`,username`
         }
         if(month){
             arr.push(`month(order_date)=${month}`)
+        }if(year){
+            arr.push(`year(order_date)=${year}`)
         }
         for(var i =0; i< arr.length; i++){
             if(i===0){
@@ -294,10 +312,71 @@ module.exports={
           }
           
          sql += ` from order_user ${newLink}; `
+        //  console.log(sql)
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw err
                 res.send(result)
+                
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    },
+
+    getPdf:(req,res)=>{
+        // console.log(req.body.title)
+        fs.readFile('./helpers/template/report.html', {encoding : 'utf-8'}, (err,readResult)=>{
+            try{
+                if(err) throw err
+                var template = hbrs.compile(readResult)
+               var data =req.body
+               var hasilHbrs = template(data)
+               var options = {
+                   format : 'A4',
+                   orientation : 'potrait',
+                   border : {
+                       top : "0.3in",
+                       bottom : "0.3in",
+                       left : "0.3in"
+                   }
+               }
+                pdf.create(hasilHbrs, options).toFile('./pdf/report.pdf', (err1, hasilPdf)=>{
+                if(err) throw err
+                console.log(hasilPdf)
+                res.send({path:'/pdf/report.pdf'})
+
+                })
+   
+            }
+            catch(err){
+                res.send(err)
+            }
+        })
+    
+    },
+    getTransactionDatabyUser : (req,res)=>{
+        var username= req.query.username
+        var id = req.query.id
+        console.log(id)
+        console.log(username)
+        
+        var sql = `select id from order_user where id=${id} and username='${username}'`
+        db.query(sql, (err,result)=>{
+            try{
+                if(err) throw err
+                if(res.length===0){
+                    res.send('false')
+                    console.log('kosong')
+                    console.log(result)
+
+                }
+                
+                else{ res.send('true')
+                console.log('ada')
+                console.log(result)
+            }
                 
             }
             catch(err){

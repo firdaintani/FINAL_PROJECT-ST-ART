@@ -9,7 +9,7 @@ module.exports={
         var password = req.query.password
         var passwordBr = cryp.createHmac('sha256', 'key').update(password).digest('hex')
     
-        var sql = `select username, role, verified from user where username='${username}' and password='${passwordBr}'`
+        var sql = `select username, role, verified,email from user where username='${username}' and password='${passwordBr}'`
         db.query(sql, (err, result)=>{
             try{
                 if(err) throw {error:true, msg: 'Username or password wrong. Please check again.'}
@@ -39,7 +39,8 @@ module.exports={
                 var sql1 = `insert into user set ?`
                 db.query(sql1, data,(err1,result1)=>{
                     try{
-                        if(err1) throw {error:true, msg :'Username not available. Please try another username.'}
+                        if(err1) throw {error : true, msg : err1.sqlMessage}
+                        // if(err1) throw err1.
                             transporter.sendMail(mailOptions,(err,result)=>{
                                 if(err) throw {error:true, msg:'error while sending the email'}
                                 res.send('Register success')

@@ -5,7 +5,7 @@ const filterConfig = (req,file,cb)=>{
     } else{
         req.validation = {error:true, msg : 'File must be image'}
         cb(null,false)
-        // cb(new Error('image must be jpg or png'),false)
+      
     }
 }
 

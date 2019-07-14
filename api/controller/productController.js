@@ -52,29 +52,25 @@ module.exports={
     },
     deleteProduct : (req,res)=>{
         var id = req.params.id
-        var sql = `select product_image from product where id=${id}`
+       
+        // var sql = `select product_image from product where id=${id}`
+        var sql = `update product set deleted=1 where id=${id}`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'error in database'}
-                // if(err) throw err
-                fs.unlinkSync(result[0].product_image)
+                // var sql1 = `delete from product where id=${id}`
               
-               
-                var sql1 = `delete from product where id=${id}`
-               
-                
-                db.query(sql1, (err1, result1)=>{
-                    if(err1) throw {error:true, msg:'error in database'}
-                    // if(err1) throw err1
+                // db.query(sql1, (err1, result1)=>{
+                //     if(err1) return res.send({error:true, msg : 'Cant delete because it is on order or cart data!'})
+                  
                     var sql2 = `select * from show_product_list`
                     db.query(sql2, (err2,result2)=>{
                         if(err2) throw {error:true, msg:'error in database'}
-                        // if(err2) throw err2
-                        // console.log(result2[0])
+                        // fs.unlinkSync(result[0].product_image)
                         res.send(result2)
 
                     })
-                })
+                // })
             }
             catch(err){
                 res.send(err)
@@ -120,7 +116,14 @@ module.exports={
         }
     },
      getAllProduct : (req,res)=>{
-        var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id;`
+         var username = req.query.username
+         if(username===undefined) username=''
+        // var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id where deleted=0 limit 12 offset ${req.params.page*12};`
+        var sql =`select product.id,w_id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id left join (select id as w_id,id_product from wishlist where username='${username}') as w on product.id=w.id_product where deleted=0 limit 12 offset ${req.query.page*12};
+        `
+
+        
+        console.log(sql)
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
@@ -130,6 +133,16 @@ module.exports={
                 res.send(err)
             }
         })
+    },
+    getPaging :(req,res)=>{
+        
+
+        var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id where deleted=0 limit 12 offset ${req.params.page*12}`
+        conn.query(sql, (err,result)=>{
+            if(err) throw err
+            res.send(result)
+        })
+    
     },
     getProductDetail : (req,res)=>{
         var id = req.params.id
@@ -151,7 +164,10 @@ module.exports={
         var price_min = req.query.price_min
         var price_max = req.query.price_max
         var sortby = req.query.sortby
-
+        var page = req.query.page
+        var username= req.query.username
+        if(username===undefined) username=''
+        // console.log(`page ${page}`)
         var link = []
         var newLink = ''
         if(key){
@@ -188,6 +204,8 @@ module.exports={
               newLink += ' and ' + link[i].params
             }
           }
+          newLink+=` and deleted=0`
+
           if(sortby){
             var sort = sortby.split('-')
             if(sort[0]==='date'){
@@ -198,11 +216,15 @@ module.exports={
                 newLink+=` order by (product.price-(product.price*(product.discount/100))) `+sort[1]  
                   
             }
+        
         }
-        var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id ${newLink};`
+        newLink+=` limit 12 offset ${page*12}`
+        var sql = `select w_id,product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id left join (select id as w_id,id_product from wishlist where username='${username}') as w on product.id=w.id_product  ${newLink};`
+        console.log(sql)
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
+                
                 res.send(result)
             }
             catch(err){
@@ -212,7 +234,7 @@ module.exports={
     
     },
     productDiscount : (req,res)=>{
-        var sql = `select * from show_product_list where discount>0 and stock>0 order by discount desc limit 10`
+        var sql = `select * from show_product_list where discount>0 and stock>0 and deleted=0 order by discount desc`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}
@@ -224,7 +246,7 @@ module.exports={
         })
     },
     newArrival : (req,res)=>{
-        var sql = `select * from show_product_list where stock>0 order by id desc limit 10`
+        var sql = `select * from show_product_list where stock>0 and deleted=0 order by id desc limit 10`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'Error in database while retrieving data.'}

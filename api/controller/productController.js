@@ -53,24 +53,17 @@ module.exports={
     deleteProduct : (req,res)=>{
         var id = req.params.id
        
-        // var sql = `select product_image from product where id=${id}`
         var sql = `update product set deleted=1 where id=${id}`
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw {error:true, msg: 'error in database'}
-                // var sql1 = `delete from product where id=${id}`
-              
-                // db.query(sql1, (err1, result1)=>{
-                //     if(err1) return res.send({error:true, msg : 'Cant delete because it is on order or cart data!'})
-                  
+    
                     var sql2 = `select * from show_product_list`
                     db.query(sql2, (err2,result2)=>{
                         if(err2) throw {error:true, msg:'error in database'}
-                        // fs.unlinkSync(result[0].product_image)
                         res.send(result2)
 
                     })
-                // })
             }
             catch(err){
                 res.send(err)
@@ -118,7 +111,6 @@ module.exports={
      getAllProduct : (req,res)=>{
          var username = req.query.username
          if(username===undefined) username=''
-        // var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id where deleted=0 limit 12 offset ${req.params.page*12};`
         var sql =`select product.id,w_id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id left join (select id as w_id,id_product from wishlist where username='${username}') as w on product.id=w.id_product where deleted=0 limit 12 offset ${req.query.page*12};
         `
 
@@ -135,8 +127,6 @@ module.exports={
         })
     },
     getPaging :(req,res)=>{
-        
-
         var sql = `select product.id, name, brand.brand_name, price,stock, discount, product_image from product join brand on product.brand_id = brand.id where deleted=0 limit 12 offset ${req.params.page*12}`
         conn.query(sql, (err,result)=>{
             if(err) throw err
@@ -167,7 +157,6 @@ module.exports={
         var page = req.query.page
         var username= req.query.username
         if(username===undefined) username=''
-        // console.log(`page ${page}`)
         var link = []
         var newLink = ''
         if(key){

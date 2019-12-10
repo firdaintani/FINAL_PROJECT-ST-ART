@@ -3,7 +3,6 @@ var db = require('./../database')
 module.exports={
     getWishlist : (req,res)=>{
         var username = req.params.username
-        // console.log(username)
         var sql = `select * from wishlist_view where username='${username}';`
         console.log(sql)
         db.query(sql,(err,result)=>{
@@ -68,7 +67,6 @@ module.exports={
         var searchkey = req.query.s
         var username= req.query.u
         var sql = `select * from wishlist_view where username='${username}' and name like '%${searchkey}%' `
-        // console.log(sql)
         db.query(sql, (err,result)=>{
             try{
                 if(err) throw err

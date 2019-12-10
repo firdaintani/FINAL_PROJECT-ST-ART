@@ -61,10 +61,10 @@ module.exports={
                         })
                   
                     
-                })
-            }else{
-                res.send({error:true, msg : 'Brand name exist'})
-            }
+                    })
+                }else{
+                    res.send({error:true, msg : 'Brand name exist'})
+                }
         
             }
             catch(err){

@@ -41,7 +41,6 @@ module.exports={
         db.query(sql, data, (err,result)=>{
                 
                 if (err) throw {error:true, msg : 'error while inserting data'}
-              
                 res.send('berhasil')
         })
 

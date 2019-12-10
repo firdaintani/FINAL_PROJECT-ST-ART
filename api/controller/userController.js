@@ -97,7 +97,6 @@ module.exports = {
            
             var newData = {...data}
             delete newData.oldEmail
-            // console.log(newData.username)
             var sql = `update user set ? where username='${username}'`
             db.query(sql, newData, (err,result)=>{
                try{
@@ -141,7 +140,6 @@ module.exports = {
                 db.query(sql1, (err3,result3)=>{
                     
                         if(err3) throw {error:true, msg : 'error in database'}
-                        // console.log(result3)
                         res.send(result3)
            
                 })
@@ -174,7 +172,6 @@ module.exports = {
         checkEmail : (req,res)=>{
             
             var email = req.query.email
-            console.log(email)
             var sql = `select email from user where email='${email}'`
             db.query(sql, (err, result)=>{
                 try{

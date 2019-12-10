@@ -22,7 +22,6 @@ module.exports = {
                         }
                         res.send("success")
                     })
-                    // res.send(result)
                 } else {
                     var sql2 = `insert into cart set ?`
                     db.query(sql2, data, (err2, result2) => {
@@ -168,7 +167,6 @@ module.exports = {
                                                     error: true,
                                                     msg: 'error while sending the email'
                                                 }
-                                                // ON SCHEDULE AT str_to_date('${data.payment_due}', '%d %M %Y %H:%i:%s')
 
                                                 var sql6= `
                                                     CREATE EVENT checkout_${id}
